@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["filterJson"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String             @id @default(uuid())
+  active           Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  identityNumber   String             @unique @db.VarChar(16)
+  name             String?
+  email            String             @unique
+  password         String
+  avatarUrl        String?
+  address          String?
+  phone            String?
+  dateOfBirth      DateTime?          @db.Date
+  placeOfBirth     String?
+  location         String?
+  position         String?
+  sex              Int?               @db.TinyInt
+  blood            String?            @db.Char(2)
+  role             Role
+  attendance       Attendance[]
+  deviceId         String?            @unique
+  divisionId       String?            @db.Char(3)
+  divison          Division?          @relation(fields: [divisionId], references: [id])
+  subdivisionId    String?            @db.Char(3)
+  subdivision      Subdivision?       @relation(fields: [subdivisionId], references: [id])
+  departmentId     String?            @db.Char(3)
+  department       Department?        @relation(fields: [departmentId], references: [id])
+  companyId        String?            @db.Char(3)
+  company          Company?           @relation(fields: [companyId], references: [id])
+  Family           Family[]
+  EmployeeSchedule EmployeeSchedule[]
+}
+
+model ForgotPassword {
+  id      String  @id @default(uuid())
+  userId  String
+  claimed Boolean
+}
+
+model FCM {
+  userId String @unique
+  token  String
+}
+
+model Inbox {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String?
+  body      String?  @db.Text
+  data      String?
+  userIds   Json?
+}
+
+model Family {
+  id             String    @id @default(cuid())
+  identityNumber String    @unique @db.VarChar(16)
+  name           String?
+  sex            Int?      @db.TinyInt
+  dateOfBirth    DateTime? @db.Date
+  placeOfBirth   String?
+  relationship   Int?      @db.TinyInt
+  user           User      @relation(fields: [userId], references: [id])
+  userId         String
+}
+
+model EmployeeSchedule {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  day       Int      @db.TinyInt
+  startTime Int
+  endTime   Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Division {
+  id          String        @id @db.Char(3)
+  name        String
+  user        User[]
+  company     Company       @relation(fields: [companyId], references: [id])
+  companyId   String        @db.Char(3)
+  Subdivision Subdivision[]
+}
+
+model Department {
+  id            String      @id @db.Char(3)
+  name          String
+  User          User[]
+  subdivision   Subdivision @relation(fields: [subdivisionId], references: [id])
+  subdivisionId String      @db.Char(3)
+}
+
+model Subdivision {
+  id         String       @id @db.Char(3)
+  name       String
+  User       User[]
+  division   Division     @relation(fields: [divisionId], references: [id])
+  divisionId String       @db.Char(3)
+  Department Department[]
+}
+
+model Company {
+  id       String     @id @db.Char(3)
+  name     String
+  User     User[]
+  Division Division[]
+}
+
+model MasterLocation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  address   String
+  latitude  Float
+  longitude Float
+  radius    Int
+}
+
+model Attendance {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  latitude         Float
+  longitude        Float
+  user             User               @relation(fields: [userId], references: [id])
+  userId           String
+  photoUrl         String
+  description      String?
+  masterLocationId String?
+  value            AttendanceValue
+  type             TypeAttendance
+  problem          AttendanceProblem?
+}
+
+enum TypeAttendance {
+  Visit
+  Live
+}
+
+enum AttendanceValue {
+  ClockIn
+  ClockOut
+}
+
+enum AttendanceProblem {
+  A1
+  A2
+  A3
+  A4
+  A5
+  A6
+}
+
+model Announcement {
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  expiredAt      DateTime?
+  title          String
+  description    String       @db.Text
+  companyIds     Json?
+  divisionIds    Json?
+  subdivisionIds Json?
+  published      Boolean      @default(false)
+  attachment     Attachment[]
+}
+
+model Attachment {
+  id             String        @id @default(cuid())
+  createdAt      DateTime      @default(now())
+  name           String
+  url            String
+  announcement   Announcement? @relation(fields: [announcementId], references: [id])
+  announcementId Int?
+}
+
+model Question {
+  id           String @id @default(cuid())
+  question     String
+  answer       String
+  wrongCounter Int    @default(0) @db.TinyInt
+}
+
+model History {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  userId      String?
+  description String?
+  oldValue    String?
+  newValue    String?
+}

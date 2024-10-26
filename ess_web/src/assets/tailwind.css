@@ -1,0 +1,17 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+.alert-absolute {
+  @apply absolute top-8 right-8 !important;
+}
+
+.v-app-bar-title__content {
+  @apply overflow-visible !important;
+}
+
+.absolute-bottom-right {
+  @apply absolute bottom-2 right-2 !important;
+}

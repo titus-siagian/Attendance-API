@@ -1,0 +1,11 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "assets": [
+      { "include": "mail/templates/**/*", "outDir": "dist/src" },
+      { "include": "attendance/template/**/*", "outDir": "dist/src" }
+    ],
+    "watchAssets": true
+  }
+}
